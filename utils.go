@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 func GetInput(day uint8) string {
@@ -43,4 +44,18 @@ func ReadFileToString(path string) string {
 	}
 
 	return string(bytes)
+}
+
+func GetTrimmedLines(s string) []string {
+	lines := strings.Split(s, "\n")
+	suppressed := 0
+	for i, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			suppressed++
+			continue
+		}
+		lines[i-suppressed] = line
+	}
+	return lines[:len(lines)-suppressed]
 }

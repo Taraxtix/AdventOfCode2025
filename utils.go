@@ -19,30 +19,17 @@ func GetTestInput(day uint8) string {
 
 func ReadFileToString(path string) string {
 	file, err := os.Open(path)
-	if err != nil {
-		log.Fatalln("Could not open file `" + path + "` verify that it exists in the same directory as the executable:" + err.Error())
-	}
-	defer func() {
-		err := file.Close()
-		if err != nil {
-			log.Fatalln(err)
-		}
-	}()
+	AssertSuccess(err, "Could not open file `"+path+"` verify that it exists in the same directory as the executable")
+	defer func() { AssertSuccess(file.Close(), "Could not close file `"+path+"`") }()
 
 	fileStat, err := file.Stat()
-	if err != nil {
-		log.Fatalln("Could not get file stats" + err.Error())
-	}
+	AssertSuccess(err, "Could not get file stats")
 
 	bytes := make([]byte, fileStat.Size())
 	n, err := file.Read(bytes)
-	if err != nil {
-		log.Fatalln("Could not read file contents" + err.Error())
-	}
-	if n < len(bytes) {
-		log.Fatalln("Could not read entire file")
-	}
+	AssertSuccess(err, "Could not read file contents")
 
+	Assert(n == len(bytes), "Could not read entire file")
 	return string(bytes)
 }
 
@@ -58,4 +45,20 @@ func GetTrimmedLines(s string) []string {
 		lines[i-suppressed] = line
 	}
 	return lines[:len(lines)-suppressed]
+}
+
+func Assert(condition bool, message string) {
+	if !condition {
+		log.Fatalln("ASSERTION FAILED:\n\t" + message)
+	}
+}
+
+func AssertEqual(actual, expected interface{}) {
+	Assert(actual == expected, fmt.Sprintf("Expected `%v`, got `%v`", expected, actual))
+}
+
+func AssertSuccess(err error, message string) {
+	if err != nil {
+		Assert(false, message+": "+err.Error())
+	}
 }

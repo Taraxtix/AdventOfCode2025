@@ -23,9 +23,7 @@ func RotationFromString(s string, i int) Rotation {
 		println("ALERT: Rotation string too short: `" + s + "`. (index " + strconv.Itoa(i) + ")")
 	}
 	steps, err := strconv.ParseUint(s[1:], 10, 64)
-	if err != nil {
-		log.Fatalln("Unable to parse rotation steps (`" + s[1:] + "`): " + err.Error())
-	}
+	aoc2025.AssertSuccess(err, "Unable to parse rotation steps (`"+s[1:]+"`): ")
 
 	switch s[0] {
 	case 'L':

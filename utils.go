@@ -62,3 +62,15 @@ func AssertSuccess(err error, message string) {
 		Assert(false, message+": "+err.Error())
 	}
 }
+
+type Addable interface {
+	~int | ~int64 | ~float64 | ~string | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
+}
+
+func Sum[T Addable](list []T) T {
+	var sum T
+	for _, v := range list {
+		sum = sum + v
+	}
+	return sum
+}

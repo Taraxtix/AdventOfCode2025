@@ -36,6 +36,15 @@ func AssertSuccess(err error, message string) {
 	}
 }
 
+func All[T any](list []T, fn func(T) bool) bool {
+	for _, v := range list {
+		if !fn(v) {
+			return false
+		}
+	}
+	return true
+}
+
 type Addable interface {
 	~int | ~int64 | ~float64 | ~string | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
 }

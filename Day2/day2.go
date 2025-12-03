@@ -6,57 +6,39 @@ import (
 	"strings"
 )
 
-type Range struct {
-	start uint64
-	end   uint64
+func isInvalidPart1(v uint64) bool {
+	str := strconv.FormatUint(v, 10)
+	return str[:len(str)/2] == str[len(str)/2:]
 }
 
-func (r Range) collectInvalidsPart1() []uint64 {
-	invalids := make([]uint64, 0)
-	for i := r.start; i <= r.end; i++ {
-		str := strconv.FormatUint(i, 10)
-		if len(str)%2 != 0 { // Odd number of digits can't be invalid
-			continue
-		}
-		if str[:len(str)/2] == str[len(str)/2:] {
-			invalids = append(invalids, i)
-		}
-	}
-	return invalids
-}
+func isInvalidsPart2(v uint64) bool {
+	str := strconv.FormatUint(v, 10)
+	uSeqLengths := aoc2025.MakeRangeInclusive(1, uint64(len(str)/2))
+	seqLengths := aoc2025.Map(uSeqLengths, func(seqLength uint64) int { return int(seqLength) })
+	seqLengths = aoc2025.Filter(seqLengths, func(seqLength int) bool { return len(str)%seqLength == 0 })
 
-func (r Range) collectInvalidsPart2() []uint64 {
-	invalids := make([]uint64, 0)
-Value:
-	for val := r.start; val <= r.end; val++ {
-		str := strconv.FormatUint(val, 10)
-	SequenceLength:
-		for seqLength := 1; seqLength <= len(str)/2; seqLength++ {
-			if len(str)%seqLength != 0 { // Cannot found a repeating sequence of this length
-				continue
+seqLength:
+	for _, seqLength := range seqLengths {
+		for k := 1; k < len(str)/seqLength; k++ {
+			start := (k - 1) * seqLength
+			mid := k * seqLength
+			end := (k + 1) * seqLength
+			if str[start:mid] != str[mid:end] {
+				continue seqLength
 			}
-			for k := 1; k < len(str)/seqLength; k++ {
-				start := (k - 1) * seqLength
-				mid := k * seqLength
-				end := (k + 1) * seqLength
-				if str[start:mid] != str[mid:end] {
-					continue SequenceLength
-				}
-			}
-			invalids = append(invalids, val)
-			continue Value
 		}
+		return true
 	}
-	return invalids
+	return false
 }
 
-func ParseRange(s string) Range {
+func ParseRange(s string) []uint64 {
 	bounds := strings.Split(s, "-")
 	start, err := strconv.ParseUint(bounds[0], 10, 64)
 	aoc2025.AssertSuccess(err, "Unable to parse first bound (`"+bounds[0]+"`)")
 	end, err := strconv.ParseUint(bounds[1], 10, 64)
 	aoc2025.AssertSuccess(err, "Unable to parse first bound (`"+bounds[1]+"`)")
-	return Range{start, end}
+	return aoc2025.MakeRangeInclusive(start, end)
 }
 
 func main() {
@@ -65,19 +47,19 @@ func main() {
 	aoc2025.AssertEqual(len(lines), 1)
 
 	rangesStr := strings.Split(lines[0], ",")
-	ranges := make([]Range, len(rangesStr))
+	ranges := make([][]uint64, len(rangesStr))
 	for i, rangeStr := range rangesStr {
 		ranges[i] = ParseRange(rangeStr)
 	}
 
 	invalidsPart1 := make([]uint64, 0)
 	for _, range_ := range ranges {
-		invalidsPart1 = append(invalidsPart1, range_.collectInvalidsPart1()...)
+		invalidsPart1 = append(invalidsPart1, aoc2025.Filter(range_, isInvalidPart1)...)
 	}
 
 	invalidsPart2 := make([]uint64, 0)
 	for _, range_ := range ranges {
-		invalidsPart2 = append(invalidsPart2, range_.collectInvalidsPart2()...)
+		invalidsPart2 = append(invalidsPart2, aoc2025.Filter(range_, isInvalidsPart2)...)
 	}
 
 	println("Part1: " + strconv.FormatUint(aoc2025.Sum(invalidsPart1), 10))

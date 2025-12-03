@@ -18,10 +18,8 @@ type Rotation struct {
 	steps     uint64
 }
 
-func RotationFromString(s string, i int) Rotation {
-	if len(s) < 2 {
-		println("ALERT: Rotation string too short: `" + s + "`. (index " + strconv.Itoa(i) + ")")
-	}
+func RotationFromString(s string) Rotation {
+	aoc2025.Assert(len(s) >= 2, "Rotation string too short: `"+s+"`.")
 	steps, err := strconv.ParseUint(s[1:], 10, 64)
 	aoc2025.AssertSuccess(err, "Unable to parse rotation steps (`"+s[1:]+"`): ")
 
@@ -81,12 +79,9 @@ func main() {
 	input := aoc2025.GetInput(1)
 	lines := aoc2025.GetTrimmedLines(input)
 
-	rotations := make([]Rotation, len(lines))
-	for i, rotationStr := range lines {
-		rotations[i] = RotationFromString(rotationStr, i)
-	}
+	rotations := aoc2025.Map(lines, RotationFromString)
 
-	dial := Dial{50, 0, .00}
+	dial := Dial{50, 0, 0}
 	dial.rotateAll(rotations)
 	println("Part1: " + strconv.Itoa(int(dial.atZero)))
 	println("Part2: " + strconv.Itoa(int(dial.zeroPassed)))

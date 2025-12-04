@@ -83,6 +83,16 @@ func Filter[T any](list []T, fn func(T) bool) []T {
 	return ret
 }
 
+func FilterWithIndex[T any](list []T, fn func(T, int) bool) []T {
+	ret := make([]T, 0)
+	for i, v := range list {
+		if fn(v, i) {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
+
 func MapSome[Arg, Ret any](list []Arg, fn func(Arg) (Ret, bool)) []Ret {
 	ret := make([]Ret, 0)
 	for _, v := range list {

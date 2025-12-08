@@ -11,7 +11,7 @@ func isInvalidPart1(v uint64) bool {
 	return str[:len(str)/2] == str[len(str)/2:]
 }
 
-func isInvalidsPart2(v uint64) bool {
+func isInvalidPart2(v uint64) bool {
 	str := strconv.FormatUint(v, 10)
 	uSeqLengths := aoc2025.MakeRangeInclusive(1, uint64(len(str)/2))
 	seqLengths := aoc2025.Map(uSeqLengths, func(seqLength uint64) int { return int(seqLength) })
@@ -32,35 +32,25 @@ seqLength:
 	return false
 }
 
-func ParseRange(s string) []uint64 {
-	bounds := strings.Split(s, "-")
-	start, err := strconv.ParseUint(bounds[0], 10, 64)
-	aoc2025.AssertSuccess(err, "Unable to parse first bound (`"+bounds[0]+"`)")
-	end, err := strconv.ParseUint(bounds[1], 10, 64)
-	aoc2025.AssertSuccess(err, "Unable to parse first bound (`"+bounds[1]+"`)")
-	return aoc2025.MakeRangeInclusive(start, end)
-}
-
 func main() {
 	input := aoc2025.GetInput(2)
 	lines := aoc2025.GetTrimmedLines(input)
 	aoc2025.AssertEqual(len(lines), 1)
 
-	rangesStr := strings.Split(lines[0], ",")
-	ranges := make([][]uint64, len(rangesStr))
-	for i, rangeStr := range rangesStr {
-		ranges[i] = ParseRange(rangeStr)
-	}
+	ranges := aoc2025.Map(strings.Split(lines[0], ","), aoc2025.ParseRange)
 
-	invalidsPart1 := make([]uint64, 0)
-	for _, range_ := range ranges {
-		invalidsPart1 = append(invalidsPart1, aoc2025.Filter(range_, isInvalidPart1)...)
-	}
-
-	invalidsPart2 := make([]uint64, 0)
-	for _, range_ := range ranges {
-		invalidsPart2 = append(invalidsPart2, aoc2025.Filter(range_, isInvalidsPart2)...)
-	}
+	invalidsPart1 := aoc2025.Flatten(
+		aoc2025.Map(
+			ranges,
+			func(r aoc2025.Range) []uint64 { return aoc2025.Filter(r.AsList(), isInvalidPart1) },
+		),
+	)
+	invalidsPart2 := aoc2025.Flatten(
+		aoc2025.Map(
+			ranges,
+			func(r aoc2025.Range) []uint64 { return aoc2025.Filter(r.AsList(), isInvalidPart2) },
+		),
+	)
 
 	println("Part1: " + strconv.FormatUint(aoc2025.Sum(invalidsPart1), 10))
 	println("Part2: " + strconv.FormatUint(aoc2025.Sum(invalidsPart2), 10))

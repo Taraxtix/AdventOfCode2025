@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -103,6 +104,21 @@ func MapSome[Arg, Ret any](list []Arg, fn func(Arg) (Ret, bool)) []Ret {
 	return ret
 }
 
+func Flatten[T any](list [][]T) []T {
+	ret := make([]T, 0)
+	for _, v := range list {
+		ret = append(ret, v...)
+	}
+	return ret
+}
+
+func Reduce[T any, R any](list []T, acc R, fn func(R, T) R) R {
+	for _, v := range list {
+		acc = fn(acc, v)
+	}
+	return acc
+}
+
 func GetInput(day uint8) string {
 	path := fmt.Sprintf("Day%d/input.txt", day)
 	return ReadFileToString(path)
@@ -136,3 +152,25 @@ func GetTrimmedLines(s string) []string {
 		return line, line != ""
 	})
 }
+
+func AssertedParseUint64(s string) uint64 {
+	i, err := strconv.ParseUint(s, 10, 64)
+	AssertSuccess(err, "Unable to parse uint64 `"+s+"'")
+	return i
+}
+
+type Range struct {
+	Start uint64
+	End   uint64
+}
+
+func ParseRange(s string) Range {
+	bounds := strings.Split(s, "-")
+	start := AssertedParseUint64(bounds[0])
+	end := AssertedParseUint64(bounds[1])
+	return Range{start, end}
+}
+
+func (r Range) AsList() []uint64 { return MakeRangeInclusive(r.Start, r.End) }
+
+func (r Range) Contains(v uint64) bool { return r.Start <= v && v <= r.End }

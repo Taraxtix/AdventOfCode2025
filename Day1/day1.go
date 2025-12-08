@@ -20,8 +20,7 @@ type Rotation struct {
 
 func RotationFromString(s string) Rotation {
 	aoc2025.Assert(len(s) >= 2, "Rotation string too short: `"+s+"`.")
-	steps, err := strconv.ParseUint(s[1:], 10, 64)
-	aoc2025.AssertSuccess(err, "Unable to parse rotation steps (`"+s[1:]+"`): ")
+	steps := aoc2025.AssertedParseUint64(s[1:])
 
 	switch s[0] {
 	case 'L':
